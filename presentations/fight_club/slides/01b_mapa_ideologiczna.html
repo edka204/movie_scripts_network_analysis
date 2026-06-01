@@ -1,0 +1,364 @@
+<section class="slide-interpretation">
+<style>
+  /* ── Ideological Map Slide ── */
+  .ideo-map {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Title bar */
+  .ideo-title-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 1rem 2.5rem 0.6rem;
+    z-index: 10;
+  }
+  .ideo-title-bar h2 {
+    font-family: var(--display);
+    font-size: 2rem;
+    letter-spacing: 0.08em;
+    color: var(--red);
+    text-transform: uppercase;
+    line-height: 1.05;
+    margin: 0;
+  }
+  .ideo-title-bar .ideo-subtitle {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.25rem;
+  }
+
+  /* SVG connection layer */
+  .ideo-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ── Central triad ── */
+  .ideo-triad {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    width: 220px;
+    text-align: center;
+  }
+  .triad-nodes {
+    position: relative;
+    width: 220px;
+    height: 150px;
+    margin: 0 auto;
+  }
+  .triad-node {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .triad-node .tn-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white);
+    border: 2px solid;
+    box-shadow: 0 0 18px rgba(0,0,0,0.6);
+  }
+  .triad-node .tn-name {
+    font-family: var(--display);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+  }
+  .triad-node.jack { left: 50%; top: 0; transform: translateX(-50%); }
+  .triad-node.jack .tn-circle {
+    background: radial-gradient(circle, #c0392b 0%, #6b1a10 100%);
+    border-color: #e04030;
+    width: 52px; height: 52px;
+    font-size: 0.68rem;
+    box-shadow: 0 0 24px rgba(192, 57, 43, 0.5);
+  }
+  .triad-node.tyler { left: 0; bottom: 0; }
+  .triad-node.tyler .tn-circle {
+    background: radial-gradient(circle, #8b6914 0%, #4a3a0a 100%);
+    border-color: #c9a84c;
+  }
+  .triad-node.marla { right: 0; bottom: 0; }
+  .triad-node.marla .tn-circle {
+    background: radial-gradient(circle, #6a3080 0%, #3a1848 100%);
+    border-color: #a060c0;
+  }
+  .triad-label {
+    margin-top: 8px;
+    text-align: center;
+  }
+  .triad-label .tl-title {
+    font-family: var(--display);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .triad-label .tl-desc {
+    font-family: var(--mono);
+    font-size: 0.52rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  /* ── Satellite bubbles ── */
+  .ideo-bubble {
+    position: absolute;
+    z-index: 4;
+    width: 260px;
+    padding: 14px 16px 12px;
+    border-radius: 8px;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(4px);
+    border: 1px solid;
+  }
+  .ideo-bubble .ib-icon {
+    font-size: 1rem;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .ideo-bubble .ib-title {
+    font-family: var(--display);
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .ideo-bubble .ib-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 4px;
+    font-size: 0.64rem;
+    line-height: 1.4;
+  }
+  .ideo-bubble .ib-key {
+    font-family: var(--mono);
+    font-size: 0.52rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+    width: 62px;
+  }
+  .ideo-bubble .ib-val {
+    color: #d0d0d0;
+    font-family: var(--body);
+    font-size: 0.68rem;
+  }
+  .ideo-bubble .ib-role {
+    margin-top: 6px;
+    padding-top: 5px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .ideo-bubble .ib-role span { font-weight: 600; }
+
+  /* Bubble 1: Corporation — top-left */
+  .bubble-corp {
+    top: 11%;
+    left: 3%;
+    border-color: rgba(100, 140, 180, 0.4);
+  }
+  .bubble-corp .ib-title { color: #6ca0c8; }
+  .bubble-corp .ib-role span { color: #6ca0c8; }
+
+  /* Bubble 2: Support Groups — top-right */
+  .bubble-support {
+    top: 11%;
+    right: 3%;
+    border-color: rgba(80, 170, 100, 0.4);
+  }
+  .bubble-support .ib-title { color: #5ab870; }
+  .bubble-support .ib-role span { color: #5ab870; }
+
+  /* Bubble 3: Project Mayhem — bottom */
+  .bubble-mayhem {
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    border-color: rgba(192, 57, 43, 0.5);
+    box-shadow: 0 0 20px rgba(192, 57, 43, 0.12);
+  }
+  .bubble-mayhem .ib-title { color: var(--red); }
+  .bubble-mayhem .ib-role span { color: var(--red); }
+
+  /* ── Arrow labels ── */
+  .arrow-label {
+    position: absolute;
+    z-index: 6;
+    font-family: var(--mono);
+    font-size: 0.48rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    pointer-events: none;
+    background: rgba(10,10,10,0.7);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+  .arrow-label.al-corp   { top: 32%; left: 24%; }
+  .arrow-label.al-support { top: 32%; right: 23%; }
+  .arrow-label.al-mayhem  { bottom: 30%; left: 50%; transform: translateX(-50%); }
+</style>
+
+<div class="ideo-map">
+  <!-- Title -->
+  <div class="ideo-title-bar">
+    <div class="ideo-subtitle">Interpretacja humanistyczna · Struktura ideologiczna</div>
+    <h2>Ideologiczna mapa sieci<br><span style="font-size:0.6em; color:var(--gold); letter-spacing:0.12em;">Trzy ucieczki przed systemem</span></h2>
+  </div>
+
+  <!-- SVG connections -->
+  <svg class="ideo-svg" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <marker id="arrow-corp" viewBox="0 0 10 10" refX="10" refY="5"
+              markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#6ca0c8" opacity="0.6"/>
+      </marker>
+      <marker id="arrow-support" viewBox="0 0 10 10" refX="10" refY="5"
+              markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#5ab870" opacity="0.6"/>
+      </marker>
+      <marker id="arrow-mayhem" viewBox="0 0 10 10" refX="10" refY="5"
+              markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#c0392b" opacity="0.6"/>
+      </marker>
+    </defs>
+
+    <!-- Triad internal edges -->
+    <line x1="640" y1="310" x2="570" y2="420" stroke="#c9a84c" stroke-width="1.5" opacity="0.25" stroke-dasharray="4 3"/>
+    <line x1="640" y1="310" x2="710" y2="420" stroke="#a060c0" stroke-width="1.5" opacity="0.25" stroke-dasharray="4 3"/>
+    <line x1="570" y1="420" x2="710" y2="420" stroke="#888" stroke-width="1" opacity="0.15" stroke-dasharray="4 3"/>
+
+    <!-- Arrow: Jack → Corporation (top-left) -->
+    <path d="M 600,330 C 480,280 380,240 340,220"
+          fill="none" stroke="#6ca0c8" stroke-width="1.8" opacity="0.35"
+          marker-end="url(#arrow-corp)" stroke-dasharray="6 4"/>
+
+    <!-- Arrow: Jack → Support Groups (top-right) -->
+    <path d="M 680,330 C 800,280 900,240 940,220"
+          fill="none" stroke="#5ab870" stroke-width="1.8" opacity="0.35"
+          marker-end="url(#arrow-support)" stroke-dasharray="6 4"/>
+
+    <!-- Arrow: Jack → Project Mayhem (bottom) -->
+    <path d="M 640,360 C 640,440 640,500 640,530"
+          fill="none" stroke="#c0392b" stroke-width="2.2" opacity="0.4"
+          marker-end="url(#arrow-mayhem)" stroke-dasharray="6 4"/>
+
+    <!-- Glow behind triad -->
+    <circle cx="640" cy="370" r="90" fill="url(#triadGlow)" opacity="0.4"/>
+    <defs>
+      <radialGradient id="triadGlow">
+        <stop offset="0%" stop-color="#c0392b" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#c0392b" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <!-- Arrow labels -->
+  <div class="arrow-label al-corp">ucieczka w konsumpcję</div>
+  <div class="arrow-label al-support">ucieczka w emocje</div>
+  <div class="arrow-label al-mayhem">ucieczka w przemoc</div>
+
+  <!-- Central Triad -->
+  <div class="ideo-triad">
+    <div class="triad-nodes">
+      <div class="triad-node jack">
+        <div class="tn-circle">J</div>
+        <div class="tn-name">Jack</div>
+      </div>
+      <div class="triad-node tyler">
+        <div class="tn-circle">T</div>
+        <div class="tn-name">Tyler</div>
+      </div>
+      <div class="triad-node marla">
+        <div class="tn-circle">M</div>
+        <div class="tn-name">Marla</div>
+      </div>
+    </div>
+    <div class="triad-label">
+      <div class="tl-title">Triada — Wirusy Systemu</div>
+      <div class="tl-desc">Walka o tożsamość · Odrzucenie ról</div>
+    </div>
+  </div>
+
+  <!-- Bubble 1: Corporation -->
+  <div class="ideo-bubble bubble-corp">
+    <div class="ib-icon">◼</div>
+    <div class="ib-title">Korporacja</div>
+    <div class="ib-row">
+      <span class="ib-key">Symbol</span>
+      <span class="ib-val">„IKEA-boy" · Konsumpcjonizm</span>
+    </div>
+    <div class="ib-row">
+      <span class="ib-key">Kryzys</span>
+      <span class="ib-val">Kastracja społeczna — wycena człowieka przez portfel</span>
+    </div>
+    <div class="ib-role">Rola w sieci → <span>Narzucanie hierarchii</span></div>
+  </div>
+
+  <!-- Bubble 2: Support Groups -->
+  <div class="ideo-bubble bubble-support">
+    <div class="ib-icon">◉</div>
+    <div class="ib-title">Grupy wsparcia</div>
+    <div class="ib-row">
+      <span class="ib-key">Symbol</span>
+      <span class="ib-val">Turystyka emocjonalna · Bob</span>
+    </div>
+    <div class="ib-row">
+      <span class="ib-key">Kryzys</span>
+      <span class="ib-val">Utrata atrybutów — pasywna akceptacja bycia ofiarą</span>
+    </div>
+    <div class="ib-role">Rola w sieci → <span>Systemowy „wentyl bezpieczeństwa"</span></div>
+  </div>
+
+  <!-- Bubble 3: Project Mayhem -->
+  <div class="ideo-bubble bubble-mayhem">
+    <div class="ib-icon">☠</div>
+    <div class="ib-title">Projekt Mayhem</div>
+    <div class="ib-row">
+      <span class="ib-key">Symbol</span>
+      <span class="ib-val">Rój · Space Monkeys · Terroryzm</span>
+    </div>
+    <div class="ib-row">
+      <span class="ib-key">Kryzys</span>
+      <span class="ib-val">Toksyczna hipermęskość oparta na przemocy</span>
+    </div>
+    <div class="ib-role">Rola w sieci → <span>Utrata tożsamości na rzecz ekstremizmu</span></div>
+  </div>
+</div>
+</section>
