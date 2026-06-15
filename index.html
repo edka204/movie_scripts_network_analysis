@@ -1,1064 +1,1193 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>American Gangster — Analiza Sieci Postaci</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #121212;
-  --bg-panel: #181818;
-  --bg-card: #202020;
-  --gold: #d4af37;
-  --gold-light: #f3e5ab;
-  --gold-dim: #8b7322;
-  --crimson: #a62b2b;
-  --crimson-light: #d64040;
-  --smoke: #2a2a2a;
-  --smoke-light: #4a4a4a;
-  --accent: #e07b20;
-  --text: #e0e0e0;
-  --text-dim: #999999;
-  --border: #333333;
-  --border-light: #444444;
-  --com0: #d64040;
-  --com1: #d4af37;
-  --com2: #4ba3b5;
-  --com3: #af66cc;
-  --font-d: 'Bebas Neue', sans-serif;
-  --font-b: 'Courier Prime', monospace;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--font-b);
-  display:flex;
-  flex-direction:column;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Rocky Horror Picture Show — Analiza Dialogowa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        :root {
+            --primary-pink: #d81159;
+            --primary-purple: #8f2d56;
+            --primary-gold: #f5af19;
+            --accent-cyan: #01baef;
+            --dark-bg: #0a0a0a;
+            --light-text: #f0f0f0;
+            --secondary-pink: #ff006e;
+            --secondary-purple: #6a0572;
+            
+            --gender-K: #ff006e;
+            --gender-M: #5b21b6;
+            --gender-unknown: #888888;
+        }
 
-/* ── HEADER ── */
-header{
-  flex-shrink:0;
-  text-align:center;
-  padding:20px 20px 16px;
-  border-bottom:1px solid var(--border);
-  background:var(--bg-panel);
-  position:relative;
-}
-.h-eyebrow{
-  font-family:var(--font-b);
-  font-size:.6rem;
-  letter-spacing:.5em;
-  color:var(--text-dim);
-  text-transform:uppercase;
-  margin-bottom:6px;
-}
-.h-title{
-  font-family:var(--font-d);
-  font-size:3.2rem;
-  letter-spacing:.15em;
-  line-height:1;
-  color:var(--gold);
-}
-.h-rule{
-  width:180px;height:1px;
-  background:var(--gold-dim);
-  margin:12px auto;
-}
-.h-sub{
-  font-family:var(--font-b);
-  font-size:.65rem;
-  letter-spacing:.25em;
-  color:var(--text-dim);
-  text-transform:uppercase;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-/* ── MAIN LAYOUT ── */
-.layout{
-  flex:1;
-  display:grid;
-  grid-template-columns:1fr 340px;
-  min-height:0;
-}
+        body {
+            font-family: 'Courier Prime', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #0a0a0a 100%);
+            color: var(--light-text);
+            overflow: hidden;
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+        }
 
-/* ── GRAPH PANEL ── */
-.graph-panel{
-  position:relative;
-  overflow:hidden;
-  background:#0d0d0d;
-  border-right:1px solid var(--border);
-}
-#graph-svg{width:100%;height:100%}
+        .slide {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s ease-in-out;
+            padding: 3rem;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #0a0a0a 100%);
+        }
 
-/* Controls bar */
-.ctrl-bar{
-  position:absolute;
-  top:16px;left:50%;
-  transform:translateX(-50%);
-  display:flex;gap:8px;
-  background:var(--bg-card);
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:8px 12px;
-  z-index:10;
-  box-shadow:0 8px 24px rgba(0,0,0,.4);
-}
-.ctrl-label{
-  font-family:var(--font-b);
-  font-size:.6rem;
-  letter-spacing:.2em;
-  color:var(--text-dim);
-  text-transform:uppercase;
-  display:flex;align-items:center;
-  margin-right:8px;
-  padding-right:12px;
-  border-right:1px solid var(--border);
-}
-.ctrl-btn{
-  font-family:var(--font-d);
-  letter-spacing:.1em;
-  font-size:.8rem;
-  padding:6px 16px;
-  border-radius:4px;
-  background:transparent;
-  color:var(--text-dim);
-  border:1px solid transparent;
-  cursor:pointer;
-  transition:all .2s ease;
-}
-.ctrl-btn:hover{color:var(--text);background:var(--smoke)}
-.ctrl-btn.active{
-  background:var(--smoke-light);
-  color:var(--text);
-  border-color:var(--border-light);
-}
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
-/* ── RIGHT PANEL ── */
-.right-panel{
-  background:var(--bg-panel);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(216, 17, 89, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 45, 86, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
 
-/* Node card */
-.node-card{
-  flex-shrink:0;
-  min-height:165px;
-  padding:20px;
-  border-bottom:1px solid var(--border);
-  background:var(--bg-card);
-  position:relative;
-}
-.card-empty{
-  display:flex;align-items:center;justify-content:center;
-  height:100%;
-  color:var(--text-dim);
-  font-size:.7rem;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  text-align:center;
-  line-height:1.6;
-}
-#card-content{display:none}
-.card-community-bar{
-  height:4px;
-  border-radius:2px;
-  margin-bottom:12px;
-}
-.card-name{
-  font-family:var(--font-d);
-  font-size:1.8rem;
-  letter-spacing:.1em;
-  line-height:1.1;
-  margin-bottom:12px;
-}
-.card-metrics{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-.metric-box{
-  background:var(--bg-panel);
-  border:1px solid var(--border);
-  border-radius:4px;
-  padding:8px 10px;
-}
-.metric-box-label{
-  font-size:.6rem;
-  letter-spacing:.15em;
-  color:var(--text-dim);
-  text-transform:uppercase;
-}
-.metric-box-val{
-  font-size:.9rem;
-  color:var(--text);
-  font-weight:700;
-  margin-top:4px;
-}
-.card-neighbors{
-  margin-top:12px;
-  font-size:.65rem;
-  color:var(--text-dim);
-  line-height:1.6;
-}
-.card-neighbors span{color:var(--text);}
+        .slide > * {
+            position: relative;
+            z-index: 1;
+        }
 
-/* Legend */
-.legend-wrap{
-  flex-shrink:0;
-  padding:16px 20px;
-  border-bottom:1px solid var(--border);
-}
-.sec-title{
-  font-family:var(--font-d);
-  font-size:.95rem;
-  letter-spacing:.15em;
-  color:var(--text-dim);
-  margin-bottom:12px;
-  text-transform: uppercase;
-}
-.legend-item{
-  display:flex;align-items:center;gap:10px;
-  margin-bottom:8px;
-  font-size:.75rem;
-}
-.leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
-.leg-name{flex:1;color:var(--text)}
-.leg-cnt{color:var(--text-dim);font-size:.65rem}
+        /* Nawigacja */
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            z-index: 1000;
+        }
 
-/* Ranking */
-.ranking-wrap{
-  flex:1;
-  display:flex;flex-direction:column;
-  overflow:hidden;
-}
-.rank-head{
-  flex-shrink:0;
-  padding:16px 20px 0;
-}
-.tab-bar{
-  flex-shrink:0;
-  display:flex;
-  border-bottom:1px solid var(--border);
-  margin-top:8px;
-}
-.tab-btn{
-  flex:1;
-  font-family:var(--font-d);
-  font-size:.7rem;
-  letter-spacing:.1em;
-  padding:10px 4px;
-  background:transparent;
-  color:var(--text-dim);
-  border:none;
-  cursor:pointer;
-  transition:all .2s;
-  border-bottom:2px solid transparent;
-}
-.tab-btn:hover{color:var(--text)}
-.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
-.rank-list{
-  flex:1;
-  overflow-y:auto;
-  padding:8px 12px;
-}
-.rank-list::-webkit-scrollbar{width:6px}
-.rank-list::-webkit-scrollbar-track{background:var(--bg-panel)}
-.rank-list::-webkit-scrollbar-thumb{background:var(--border-light); border-radius: 3px;}
-.rank-item{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 10px;
-  margin-bottom:2px;
-  border-radius:4px;
-  cursor:pointer;
-  transition:background .15s;
-}
-.rank-item:hover{background:var(--smoke)}
-.rank-item.selected{
-  background:var(--smoke-light);
-}
-.ri-num{font-size:.6rem;color:var(--text-dim);width:16px;text-align:right;flex-shrink:0}
-.ri-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.ri-name{font-size:.75rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ri-bar-wrap{width:50px;height:4px;background:var(--bg);border-radius:2px;flex-shrink:0; overflow:hidden;}
-.ri-bar{height:100%;border-radius:2px;transition:width .4s}
-.ri-val{font-size:.65rem;color:var(--text-dim);width:32px;text-align:right;flex-shrink:0}
+        .nav-btn {
+            background: var(--primary-pink);
+            border: 2px solid var(--accent-cyan);
+            color: var(--light-text);
+            font-size: 1.5rem;
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-family: 'Fredoka One', sans-serif;
+        }
 
-/* ── TOOLTIP ── */
-#tooltip{
-  position:fixed;
-  display:none;
-  background:var(--bg-card);
-  border:1px solid var(--border-light);
-  border-radius:6px;
-  padding:12px 16px;
-  pointer-events:none;
-  z-index:500;
-  max-width:240px;
-  box-shadow:0 8px 24px rgba(0,0,0,.6);
-}
-.tt-name{
-  font-family:var(--font-d);
-  font-size:1.1rem;
-  letter-spacing:.1em;
-  margin-bottom:8px;
-  border-bottom:1px solid var(--border);
-  padding-bottom:6px;
-}
-.tt-row{
-  font-size:.65rem;
-  color:var(--text-dim);
-  margin-bottom:4px;
-  display:flex;justify-content:space-between;gap:16px;
-}
-.tt-val{color:var(--text);font-weight:700}
+        .nav-btn:hover {
+            background: var(--secondary-pink);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(216, 17, 89, 0.5);
+        }
 
-/* ── INTERPRETATION ── */
-.interp{
-  flex-shrink:0;
-  border-top:1px solid var(--border);
-  padding:24px 40px;
-  background:var(--bg-panel);
-}
-.interp-title{
-  font-family:var(--font-d);
-  font-size:1.4rem;
-  letter-spacing:.15em;
-  color:var(--text-dim);
-  margin-bottom:16px;
-}
-.interp-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:32px;
-}
-.ib h3{
-  font-family:var(--font-d);
-  font-size:.9rem;
-  letter-spacing:.1em;
-  color:var(--text);
-  margin-bottom:8px;
-}
-.ib p{
-  font-size:.7rem;
-  line-height:1.6;
-  color:var(--text-dim);
-}
-.ib strong{color:var(--gold)}
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
 
-/* SVG node/link styles */
-.link{pointer-events:none; stroke-linecap: round;}
-text.lbl{
-  font-family:var(--font-d);
-  letter-spacing:.08em;
-  pointer-events:none;
-  paint-order:stroke fill;
-}
-</style>
+        .slide-counter {
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+            font-family: 'Fredoka One', sans-serif;
+        }
+
+        /* Slajd 1 - Tytuł */
+        .slide-title-content {
+            text-align: center;
+            max-width: 900px;
+        }
+
+        .main-title {
+            font-family: 'Fredoka One', sans-serif;
+            font-size: 4.5rem;
+            color: var(--secondary-pink);
+            text-shadow: 0 0 20px rgba(216, 17, 89, 0.6), 0 0 40px rgba(5, 1, 239, 0.3);
+            margin-bottom: 1.5rem;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--accent-cyan);
+            margin-bottom: 3rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .title-description {
+            font-size: 1.1rem;
+            color: var(--light-text);
+            line-height: 1.8;
+            margin-bottom: 4rem;
+            opacity: 0.9;
+        }
+
+        .title-footer {
+            margin-top: auto;
+            font-size: 0.9rem;
+            color: var(--primary-gold);
+            font-style: italic;
+        }
+
+        /* Slajdy z wykresami */
+        .chart-slide {
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 2rem;
+        }
+
+        .slide-title {
+            font-family: 'Fredoka One', sans-serif;
+            font-size: 2.5rem;
+            color: var(--secondary-pink);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(216, 17, 89, 0.4);
+        }
+
+        .chart-container {
+            width: 90%;
+            max-width: 1200px;
+            height: 55vh;
+            margin: 1rem auto;
+            background: rgba(10, 10, 10, 0.5);
+            border: 2px solid var(--primary-purple);
+            border-radius: 8px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .chart-description {
+            font-size: 0.95rem;
+            color: var(--light-text);
+            text-align: center;
+            margin-top: 1rem;
+            opacity: 0.85;
+            max-width: 1000px;
+            line-height: 1.6;
+        }
+
+        .chart-footer {
+            font-size: 0.85rem;
+            color: var(--primary-gold);
+            text-align: center;
+            margin-top: 1rem;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        /* D3 Styling */
+        .bar {
+            transition: all 0.3s ease;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+            filter: brightness(1.2);
+        }
+
+        .axis-label {
+            font-size: 0.9rem;
+            fill: var(--light-text);
+        }
+
+        .axis {
+            stroke: var(--primary-purple);
+        }
+
+        .axis line, .axis path {
+            stroke: var(--primary-purple);
+            stroke-width: 1.5;
+        }
+
+        .axis text {
+            fill: var(--light-text);
+            font-size: 0.85rem;
+        }
+
+        .grid line {
+            stroke: rgba(139, 45, 86, 0.2);
+            stroke-dasharray: 2,2;
+        }
+
+        .emotion-line {
+            stroke: var(--accent-cyan);
+            stroke-width: 3;
+            fill: none;
+            filter: drop-shadow(0 0 4px rgba(1, 186, 239, 0.5));
+        }
+
+        .area-positive {
+            fill: rgba(216, 17, 89, 0.2);
+        }
+
+        .area-negative {
+            fill: rgba(139, 45, 86, 0.2);
+        }
+
+        .zero-line {
+            stroke: var(--primary-gold);
+            stroke-width: 2;
+            stroke-dasharray: 4,4;
+            opacity: 0.7;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(10, 10, 10, 0.95);
+            border: 2px solid var(--accent-cyan);
+            color: var(--light-text);
+            padding: 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            max-width: 250px;
+            z-index: 100;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Slajd 5 - Sieć */
+        .network-container {
+            width: 90%;
+            height: 65vh;
+            background: rgba(10, 10, 10, 0.5);
+            border: 2px solid var(--primary-purple);
+            border-radius: 8px;
+            position: relative;
+            margin: 1rem auto;
+        }
+
+        .network-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .link {
+            stroke: var(--primary-purple);
+            stroke-opacity: 0.5;
+            stroke-width: 1.5px;
+        }
+
+        .node {
+            cursor: pointer;
+            filter: drop-shadow(0 0 3px rgba(1, 186, 239, 0.3));
+            transition: all 0.3s ease;
+        }
+
+        .node:hover {
+            filter: drop-shadow(0 0 8px rgba(1, 186, 239, 0.8));
+            r: 1.2;
+        }
+
+        .node-label {
+            font-size: 0.85rem;
+            text-anchor: middle;
+            pointer-events: none;
+            fill: var(--light-text);
+            font-weight: bold;
+            text-shadow: 0 0 4px rgba(10, 10, 10, 0.8);
+        }
+
+        .node-label.faded {
+            opacity: 0.2;
+        }
+
+        .node-card {
+            position: absolute;
+            background: rgba(10, 10, 10, 0.95);
+            border: 2px solid var(--accent-cyan);
+            color: var(--light-text);
+            padding: 1.2rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            max-width: 280px;
+            z-index: 200;
+            display: none;
+        }
+
+        .node-card.show {
+            display: block;
+        }
+
+        .node-card h4 {
+            color: var(--secondary-pink);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .node-card p {
+            margin: 0.4rem 0;
+            line-height: 1.5;
+        }
+
+        .node-card strong {
+            color: var(--accent-cyan);
+        }
+
+        /* Slajd 6 - Interpretacja */
+        .interpretation-content {
+            max-width: 1000px;
+            height: 65vh;
+            overflow-y: auto;
+            padding: 2rem;
+            background: rgba(10, 10, 10, 0.5);
+            border: 2px solid var(--primary-purple);
+            border-radius: 8px;
+        }
+
+        .interpretation-section {
+            margin-bottom: 2rem;
+        }
+
+        .interpretation-section h3 {
+            color: var(--secondary-pink);
+            font-family: 'Fredoka One', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            text-shadow: 0 0 10px rgba(216, 17, 89, 0.3);
+        }
+
+        .interpretation-section p {
+            color: var(--light-text);
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .interpretation-section ul {
+            margin-left: 1.5rem;
+            color: var(--light-text);
+        }
+
+        .interpretation-section li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            color: var(--accent-cyan);
+            font-weight: bold;
+        }
+
+        /* Scrollbar */
+        .interpretation-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .interpretation-content::-webkit-scrollbar-track {
+            background: rgba(139, 45, 86, 0.2);
+            border-radius: 4px;
+        }
+
+        .interpretation-content::-webkit-scrollbar-thumb {
+            background: var(--primary-pink);
+            border-radius: 4px;
+        }
+
+        .interpretation-content::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-pink);
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid var(--light-text);
+        }
+
+        /* Responsywność */
+        @media (max-width: 1200px) {
+            .main-title {
+                font-size: 3rem;
+            }
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            .slide-title {
+                font-size: 2rem;
+            }
+            .chart-container {
+                height: 50vh;
+            }
+            .network-container {
+                height: 60vh;
+            }
+            .interpretation-content {
+                height: 60vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 1.5rem;
+            }
+            .main-title {
+                font-size: 2rem;
+            }
+            .subtitle {
+                font-size: 1rem;
+            }
+            .slide-title {
+                font-size: 1.5rem;
+            }
+            .nav-btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 1.1rem;
+            }
+            .chart-container {
+                height: 45vh;
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div id="slides-container">
+        <!-- Slajd 1: Tytuł -->
+        <div class="slide active">
+            <div class="slide-title-content">
+                <h1 class="main-title">THE ROCKY HORROR PICTURE SHOW</h1>
+                <p class="subtitle">Głos · Płeć · Emocje</p>
+                <p class="subtitle">Analiza Dialogowa Scenariusza</p>
+                <p class="title-description">
+                    Eksploracja struktury narracyjnej przez sieć postaci, udział w dialogu oraz łuk emocjonalny.<br>
+                    Jak rozkład mowy między postaciami kształtuje doświadczenie widza?
+                </p>
+                <p class="title-footer">Humanistyka Cyfrowa · Social Network Analysis · Character Network Analysis</p>
+            </div>
+        </div>
 
-<header>
-  <div class="h-eyebrow">Ridley Scott &bull; 2007 &bull; Social Network Analysis</div>
-  <div class="h-title">AMERICAN GANGSTER</div>
-  <div class="h-rule"></div>
-  <div class="h-sub">Analiza Sieci Postaci &mdash; Graf Współwystępowania w Scenach</div>
-</header>
+        <!-- Slajd 2: Głos i Płeć -->
+        <div class="slide chart-slide">
+            <h2 class="slide-title">KTO MÓWI? — Udział w Dialogu</h2>
+            <div class="chart-container">
+                <svg id="speakers-chart" class="chart-svg"></svg>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--gender-K);"></div>
+                    <span>Kobieta (K)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--gender-M);"></div>
+                    <span>Mężczyzna (M)</span>
+                </div>
+            </div>
+            <p class="chart-description">
+                Postacie uszeregowane wg liczby słów w scenariuszu. Frank dominuje z 24.3% całego dialogu, 
+                następnie Brad i Janet. Mężczyźni wypowiadają <span class="highlight">67.7%</span> tekstu, kobiety <span class="highlight">20.3%</span>.
+            </p>
+            <p class="chart-footer">
+                Uwaga metodologiczna: Liczba słów ≠ znaczenie postaci. Narrator może mówić mało, lecz kształtować kadry semantyczne.
+            </p>
+        </div>
 
-<div class="layout">
-  <div class="graph-panel" id="graph-panel">
-    <div class="ctrl-bar">
-      <div class="ctrl-label">Tryb:</div>
-      <button class="ctrl-btn active" data-metric="degree">Stopień</button>
-      <button class="ctrl-btn" data-metric="betweenness">Pośrednictwo</button>
-      <button class="ctrl-btn" data-metric="closeness">Bliskość</button>
-      <button class="ctrl-btn" data-metric="pagerank">PageRank</button>
+        <!-- Slajd 3: Łuk Emocjonalny -->
+        <div class="slide chart-slide">
+            <h2 class="slide-title">Kształt Historii — Łuk Emocjonalny</h2>
+            <div class="chart-container">
+                <svg id="emotion-chart" class="chart-svg"></svg>
+            </div>
+            <p class="chart-description">
+                Wygładzona walencja wzdłuż scen. Historia zaczyna się neutralnie (sceny 4–8), 
+                osiąga szczyty radości (scena 102, walencja 0.9), ale spada dramatycznie w trzecim akcie (scena 122, −0.8).
+                <span class="highlight">Trajektoria wznoszenia → płaskiej masy → spadku</span> sugeruje archetypiczną strukturę tragedii.
+            </p>
+            <p class="chart-footer">
+                Pojęcie „kształtu historii" pochodzi z pracy Vonneguta (2005) i Reagan et al. (2016, *Science*). 
+                Wygładzanie: rolling average, okno 5 scen.
+            </p>
+        </div>
+
+        <!-- Slajd 4: Emocje × Płeć -->
+        <div class="slide chart-slide">
+            <h2 class="slide-title">Emocje a Płeć — Rozkład Uczuć</h2>
+            <div class="chart-container">
+                <svg id="emotions-gender-chart" class="chart-svg"></svg>
+            </div>
+            <p class="chart-description">
+                Postacie kobiece (K) wyrażają więcej <span class="highlight">radości (43.7%)</span> niż męskie (36.2%), 
+                zaś mężczyźni wykazują wyższy udział <span class="highlight">strachu (7.05% vs 14.29% K)</span>. 
+                Mowa neutralna dominuje wśród mężczyzn (33.89%). <span class="highlight">Nie potwierdza się stereotyp: złości przypisuje się mężczyznom (6.71%) bardziej niż kobietom (5.04%).</span>
+            </p>
+            <p class="chart-footer">
+                Zastrzeżenie: Emocje przypisane przez NLP to interpretacja tekstu, nie autentyczne odczucia postaci. 
+                Model opiera się na słowach i tonacji, z błędem systematycznym dla dialogów sarkastycznych.
+            </p>
+        </div>
+
+        <!-- Slajd 5: Sieć Postaci -->
+        <div class="slide chart-slide">
+            <h2 class="slide-title">Architektura Relacji — Sieć Postaci</h2>
+            <div class="network-container">
+                <svg class="network-svg" id="network-svg"></svg>
+                <div class="node-card" id="node-card"></div>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--gender-K);"></div>
+                    <span>Kobieta</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--gender-M);"></div>
+                    <span>Mężczyzna</span>
+                </div>
+                <div class="legend-item">
+                    <span>Rozmiar węzła = liczba słów | Grubość krawędzi = wspólne sceny</span>
+                </div>
+            </div>
+            <p class="chart-description">
+                Kliknij węzeł, aby zobaczyć kartę postaci. Brad i Janet tworzą centrum sieci (24 wspólne sceny), 
+                Frank pozostaje bardziej izolowany mimo największej liczby słów. <span class="highlight">Centralizacja mowy ≠ Centralizacja relacyjna.</span>
+            </p>
+        </div>
+
+        <!-- Slajd 6: Interpretacja -->
+        <div class="slide chart-slide">
+            <h2 class="slide-title">Interpretacja — Co Mówią Nam Dane?</h2>
+            <div class="interpretation-content">
+                <div class="interpretation-section">
+                    <h3>6.1 Głos i Reprezentacja — Kto Kontroluje Narrację?</h3>
+                    <p>
+                        <span class="highlight">Mężczyźni wypowiadają 67.7% tekstu, kobiety 20.3%.</span> 
+                        Ta dysproporcja odzwierciedla patriarchalny paradygmat czasu powstania dzieła (1973). 
+                        Jednak <span class="highlight">Frank — władca świata — mówi zaledwie 24.3% wszystkich słów.</span> 
+                        Paradoks: większość mowy przypada Bradowi i Frankowi, lecz Janet (kobieta) zajmuje trzecie miejsce (13.3%), 
+                        co stawia ją na równi z Narratorem (7.96%) i Riff Raffem (6.08%). 
+                    </p>
+                    <p>
+                        <strong>Wniosek:</strong> Rocky Horror celowo rozmywa hierarchię mowy. Choć mężczyźni dominują ilościowo, 
+                        postaci kobiece otrzymują dostojna reprezentację — szczególnie Janet, która nie jest marginalizowana nawet w przestrzeni dialogowej.
+                    </p>
+                </div>
+
+                <div class="interpretation-section">
+                    <h3>6.2 Kształt Emocjonalny — Arc Narracyjny Tragedii?</h3>
+                    <p>
+                        Łuk emocjonalny pokazuje charakterystyczne zejście: <span class="highlight">początek neutralny (sceny 4–8), wzrost pozytywności w połowie (scena 102, walencja 0.9), dramatyczne upadki (scena 122, −0.8).</span>
+                    </p>
+                    <p>
+                        <strong>Interpretacja strukturalna:</strong>
+                    </p>
+                    <ul>
+                        <li><strong>Akty I–II (sceny 4–60):</strong> Stopniowe wprowadzenie, oscylacja między czystością a chaosem. Brad i Janet wkraczają w świat Franka ze strachu (walencja ujemna).</li>
+                        <li><strong>Szczyt (sceny 101–103):</strong> Międzyakt radości — kulminacja hedonizmu Franka. Scena 102 uzyskuje walencję 0.9 (najwyższa). To moment przed upadkiem.</li>
+                        <li><strong>Trzeci akt (sceny 115–132):</strong> Kaskada negatywności. Upadek Franka, przyjazd rządu (Dr. Scott), rebelii Riff Raffa. Walencja pada do −0.8 w scenie 122.</li>
+                        <li><strong>Wygaśnięcie (sceny 139–153):</strong> Powolne wyzwolenie i refleksja. Wyśpiew końcowy przywraca ton neutralny z przebłyskami radości.</li>
+                    </ul>
+                    <p>
+                        <strong>Archetypiczny wzór:</strong> To <strong>tragedia w sensie klasycznym</strong> — hybris (pycha Franka), peripeteia (inwazja) i katharsis (transformacja wszystkich postaci). 
+                        Historia nie kończy się szczęśliwie; kończy się oświeceniem. Brad i Janet opuszczają zamek jako inne osoby — niewinność stracona, dorosłość zyskana.
+                    </p>
+                </div>
+
+                <div class="interpretation-section">
+                    <h3>6.3 Emocje a Płeć — Czy Film Reprodukuje Stereotypy?</h3>
+                    <p>
+                        Rozkład emocji między K i M:
+                    </p>
+                    <ul>
+                        <li><strong>Radość:</strong> Kobiety 43.7% vs Mężczyźni 36.2% — <span class="highlight">KOBIETY wykazują więcej radości.</span> Przeciw stereotypowi.</li>
+                        <li><strong>Smutek:</strong> Zbliżone: K 17.65%, M 16.11%.</li>
+                        <li><strong>Złość:</strong> Mężczyźni 6.71%, Kobiety 5.04% — mały rozdział, ale stereotypowy kierunek (mężczyźni bardziej agresywni). Jednak różnica jest marginalna.</li>
+                        <li><strong>Strach:</strong> Kobiety 14.29% vs Mężczyźni 7.05% — <span class="highlight">KOBIETY okazują dwukrotnie więcej strachu.</span> Potwierdzenie stereotypu.</li>
+                        <li><strong>Neutralna:</strong> Mężczyźni dominują: 33.89% vs K 18.49%. Mowa mężczyzn jest bardziej proceduralna, mniej emocjonalna.</li>
+                    </ul>
+                    <p>
+                        <strong>Analiza:</strong> Rocky Horror <strong>częściowo reprodukuje stereotypy</strong> (strach u kobiet, neutralność u mężczyzn), 
+                        lecz <span class="highlight">subwersywnie je odkształca: kobiety są bardziej radosne, mężczyźni wcale nie gniewliwe.</span> 
+                        Film świadomie gra z oczekiwaniami widza — kobieta (Janet) okazuje odwagę w trzecim akcie, mężczyzna (Brad) okazuje podatność emocjonalną.
+                    </p>
+                </div>
+
+                <div class="interpretation-section">
+                    <h3>6.4 Sieć a Głos — Czy Centralne Węzły Mówią Najwięcej?</h3>
+                    <p>
+                        <strong>Rozbieżność:</strong>
+                    </p>
+                    <ul>
+                        <li><strong>Frank (24.3% słów):</strong> Główny bohater, lecz <strong>nie</strong> centralnie osadzony w sieci. Ma mniej krawędzi niż Brad lub Janet. Mówi do całej sceny, ale interakcje są bardziej monologowe (typowe dla władcy).</li>
+                        <li><strong>Brad i Janet (17.2% + 13.3%):</strong> Drugie i trzecie miejsce w mowie, <strong>ORAZ</strong> najbardziej centralne w sieci (24 wspólne sceny). To duet narracyjny — podróż głównych bohaterów.</li>
+                        <li><strong>Riff Raff, Magenta, Columbia:</strong> Mniej mowy, lecz wysokie stopnie w sieci. To sojusznicy / antagoniści, których relacje definiują świat.</li>
+                    </ul>
+                    <p>
+                        <strong>Wniosek strukturalny:</strong> Film świadomie rozdzielił <strong>władzę</strong> (Frank, monolog) od <strong>relacji</strong> (Brad-Janet, dialog). 
+                        Głównym konfliktem nie jest walka Franka z Bradem, ale wewnętrzna transformacja pary poprzez spotkanie z Frankiem. 
+                        Sieć odzwierciedla to doskonale: Brad i Janet trzymają się razem, Frank stoi obok (autokratycznie).
+                    </p>
+                </div>
+
+                <div class="interpretation-section">
+                    <h3>6.5 Pytania Badawcze na Przyszłość</h3>
+                    <ul>
+                        <li><strong>Zmiana trzeciego aktu:</strong> Czy spadek walencji w trzecim akcie koreluje z liczbą słów wygłaszanych przez antagonistów (Riff Raff, dr. Scott)? Kto wprowadza negatywność?</li>
+                        <li><strong>Seksualność a emocje:</strong> Czy sceny seksualne (Frank + Brad, Frank + Janet) mają inny profil emocjonalny niż reszta? Czy radość wzrasta wśród interakcji intymnych?</li>
+                        <li><strong>Intertekstualność:</strong> Jak rozkład emocji w Rocky Horror porównuje się do źródeł inspiracji (Frankenstein, Bride of Frankenstein, Golden Age Hollywood)?</li>
+                        <li><strong>Kulturowa recepcja:</strong> Czy wersje kinowe i telewizyjne (recut, dodane sceny) zmieniają kształt emocjonalny? Jak transformacja tekstu wpływa na interpretację?</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-    <svg id="graph-svg"></svg>
-  </div>
 
-  <div class="right-panel">
-    <div class="node-card" id="node-card">
-      <div class="card-empty" id="card-empty">← Kliknij postać<br>aby zobaczyć szczegóły</div>
-      <div id="card-content">
-        <div class="card-community-bar" id="card-bar"></div>
-        <div class="card-name" id="card-name"></div>
-        <div class="card-metrics" id="card-metrics"></div>
-        <div class="card-neighbors" id="card-neighbors"></div>
-      </div>
+    <div class="navigation">
+        <button class="nav-btn" id="prev-btn">◀ Wstecz</button>
+        <span class="slide-counter"><span id="current-slide">1</span> / 6</span>
+        <button class="nav-btn" id="next-btn">Dalej ▶</button>
     </div>
 
-    <div class="legend-wrap">
-      <div class="sec-title">Społeczności</div>
-      <div id="legend-items"></div>
-    </div>
+    <script>
+        // ===== DANE =====
+        const bundleData = {
+            "top_speakers": [
+                {"name": "FRANK", "gender": "M", "word_count": 1394, "pct_of_total": 24.28},
+                {"name": "BRAD", "gender": "M", "word_count": 986, "pct_of_total": 17.17},
+                {"name": "JANET", "gender": "K", "word_count": 766, "pct_of_total": 13.34},
+                {"name": "NARRATOR", "gender": "M", "word_count": 457, "pct_of_total": 7.96},
+                {"name": "RIFF RAFF", "gender": "M", "word_count": 349, "pct_of_total": 6.08},
+                {"name": "DR. SCOTT", "gender": "M", "word_count": 304, "pct_of_total": 5.29},
+                {"name": "COLUMBIA", "gender": "K", "word_count": 295, "pct_of_total": 5.14},
+                {"name": "ROCKY", "gender": "M", "word_count": 205, "pct_of_total": 3.57},
+                {"name": "GUESTS", "gender": "?", "word_count": 189, "pct_of_total": 3.29},
+                {"name": "ALL", "gender": "?", "word_count": 182, "pct_of_total": 3.17},
+                {"name": "VOICE OVER", "gender": "?", "word_count": 182, "pct_of_total": 3.17},
+                {"name": "EDDIE", "gender": "M", "word_count": 139, "pct_of_total": 2.42},
+                {"name": "MAGENTA", "gender": "K", "word_count": 104, "pct_of_total": 1.81},
+                {"name": "CHORUS", "gender": "?", "word_count": 93, "pct_of_total": 1.62},
+                {"name": "RALPH", "gender": "M", "word_count": 54, "pct_of_total": 0.94}
+            ],
+            "speech_by_gender": {
+                "K": {"total_words": 1165, "pct": 20.29},
+                "M": {"total_words": 3888, "pct": 67.71},
+                "?": {"total_words": 689, "pct": 12.0}
+            },
+            "emotion_arc": [
+                {"scene": 4, "avg_valence": 0.0, "rolling_valence": 0.0},
+                {"scene": 5, "avg_valence": 0.0, "rolling_valence": -0.125},
+                {"scene": 6, "avg_valence": 0.0, "rolling_valence": -0.1},
+                {"scene": 7, "avg_valence": -0.5, "rolling_valence": 0.0},
+                {"scene": 8, "avg_valence": 0.0, "rolling_valence": -0.1},
+                {"scene": 9, "avg_valence": 0.5, "rolling_valence": 0.0},
+                {"scene": 10, "avg_valence": -0.5, "rolling_valence": 0.1},
+                {"scene": 41, "avg_valence": 0.7, "rolling_valence": 0.382},
+                {"scene": 101, "avg_valence": 0.575, "rolling_valence": 0.197},
+                {"scene": 102, "avg_valence": 0.9, "rolling_valence": 0.214},
+                {"scene": 122, "avg_valence": -0.8, "rolling_valence": -0.388},
+                {"scene": 132, "avg_valence": -0.5, "rolling_valence": 0.063},
+                {"scene": 153, "avg_valence": 0.4, "rolling_valence": -0.133}
+            ],
+            "emotion_by_gender": {
+                "K": {"radość": 43.7, "smutek": 17.65, "złość": 5.04, "strach": 14.29, "zaskoczenie": 0.84, "neutralna": 18.49},
+                "M": {"radość": 36.24, "smutek": 16.11, "złość": 6.71, "strach": 7.05, "zaskoczenie": 0.0, "neutralna": 33.89}
+            },
+            "network": {
+                "nodes": [
+                    {"id": "BRAD", "gender": "M", "word_count": 986, "dominant_emotion": "radość", "avg_valence": 0.1021},
+                    {"id": "JANET", "gender": "K", "word_count": 766, "dominant_emotion": "radość", "avg_valence": -0.0244},
+                    {"id": "FRANK", "gender": "M", "word_count": 1394, "dominant_emotion": "radość", "avg_valence": 0.1857},
+                    {"id": "RIFF RAFF", "gender": "M", "word_count": 349, "dominant_emotion": "neutralna", "avg_valence": -0.0912},
+                    {"id": "MAGENTA", "gender": "K", "word_count": 104, "dominant_emotion": "radość", "avg_valence": 0.36},
+                    {"id": "DR. SCOTT", "gender": "M", "word_count": 304, "dominant_emotion": "neutralna", "avg_valence": -0.1875},
+                    {"id": "COLUMBIA", "gender": "K", "word_count": 295, "dominant_emotion": "radość", "avg_valence": 0.1786},
+                    {"id": "ALL", "gender": "?", "word_count": 182, "dominant_emotion": "neutralna", "avg_valence": 0.0692},
+                    {"id": "GUESTS", "gender": "?", "word_count": 189, "dominant_emotion": "neutralna", "avg_valence": 0.2394},
+                    {"id": "ROCKY", "gender": "M", "word_count": 205, "dominant_emotion": "smutek", "avg_valence": -0.3765},
+                    {"id": "CHORUS", "gender": "?", "word_count": 93, "dominant_emotion": "radość", "avg_valence": 0.5},
+                    {"id": "RALPH", "gender": "M", "word_count": 54, "dominant_emotion": "neutralna", "avg_valence": 0.0},
+                    {"id": "EDDIE", "gender": "M", "word_count": 139, "dominant_emotion": "radość", "avg_valence": 0.225},
+                    {"id": "NARRATOR", "gender": "M", "word_count": 457, "dominant_emotion": "radość", "avg_valence": -0.0063}
+                ],
+                "edges": [
+                    {"source": "BRAD", "target": "JANET", "weight": 24},
+                    {"source": "BRAD", "target": "FRANK", "weight": 14},
+                    {"source": "JANET", "target": "FRANK", "weight": 16},
+                    {"source": "JANET", "target": "RIFF RAFF", "weight": 9},
+                    {"source": "JANET", "target": "MAGENTA", "weight": 7},
+                    {"source": "FRANK", "target": "RIFF RAFF", "weight": 7},
+                    {"source": "FRANK", "target": "DR. SCOTT", "weight": 7},
+                    {"source": "RIFF RAFF", "target": "MAGENTA", "weight": 6},
+                    {"source": "BRAD", "target": "RIFF RAFF", "weight": 6},
+                    {"source": "RIFF RAFF", "target": "COLUMBIA", "weight": 4},
+                    {"source": "MAGENTA", "target": "COLUMBIA", "weight": 5},
+                    {"source": "JANET", "target": "DR. SCOTT", "weight": 6},
+                    {"source": "JANET", "target": "COLUMBIA", "weight": 5},
+                    {"source": "FRANK", "target": "COLUMBIA", "weight": 5},
+                    {"source": "FRANK", "target": "MAGENTA", "weight": 5}
+                ]
+            }
+        };
 
-    <div class="ranking-wrap">
-      <div class="rank-head">
-        <div class="sec-title" style="margin-bottom:0">Ranking Centralności</div>
-      </div>
-      <div class="tab-bar">
-        <button class="tab-btn active" data-tab="degree">Stopień</button>
-        <button class="tab-btn" data-tab="betweenness">Pośrednictwo</button>
-        <button class="tab-btn" data-tab="closeness">Bliskość</button>
-        <button class="tab-btn" data-tab="pagerank">PageRank</button>
-      </div>
-      <div class="rank-list" id="rank-list"></div>
-    </div>
-  </div>
-</div>
+        // ===== NAWIGACJA SLAJDÓW =====
+        let currentSlide = 0;
+        const totalSlides = 6;
 
-<div class="interp">
-  <div class="interp-title">Interpretacja Struktury Sieci</div>
-  <div class="interp-grid">
-    <div class="ib">
-      <h3>Dwie Dominanty</h3>
-      <p><strong>Richie Roberts</strong> (betweenness 0.508) i <strong>Frank Lucas</strong> (0.487) to dwa bieguny narracyjne — detektyw i gangster. Obaj pełnią rolę <strong>mostów informacyjnych</strong> między odrębnymi klastrami. Krawędź Richie–Frank (waga 5) to serce fabuły.</p>
-    </div>
-    <div class="ib">
-      <h3>Klastry Społeczności</h3>
-      <p>Algorytm modularności wykrył <strong>4 wspólnoty</strong>. Czerwona to skorumpowane SIU. Złota to imperium Franka — rodzina, dostawcy, drobnicy. Błękitna — neutralni, media. Purpurowa — prokuratura Spearmana.</p>
-    </div>
-    <div class="ib">
-      <h3>Kluczowe Krawędzie</h3>
-      <p>Najsilniejsza krawędź to <strong>Richie–Toback</strong> (waga 12). <strong>Frank–Teddy</strong> (10) i <strong>Frank–Ana</strong> (9) wskazują, że imperium opiera się mocno na więzach rodzinnych, nie czysto biznesowych.</p>
-    </div>
-  </div>
-</div>
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            document.getElementById('current-slide').textContent = currentSlide + 1;
 
-<div id="tooltip">
-  <div class="tt-name" id="tt-name"></div>
-  <div id="tt-rows"></div>
-</div>
-
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script>
-/* =====================================================================
-   DATA
-   ===================================================================== */
-const RAW_NODES = [
-  {id:"RICHIE",     community:0, betweenness:0.5085, rawSize:40},
-  {id:"TOBACK",     community:0, betweenness:0.0485, rawSize:20.24},
-  {id:"FRANK",      community:1, betweenness:0.4870, rawSize:37.07},
-  {id:"TEDDY",      community:2, betweenness:0.0350, rawSize:16.59},
-  {id:"ANA",        community:1, betweenness:0.0049, rawSize:15.12},
-  {id:"SPEARMAN",   community:3, betweenness:0.0517, rawSize:18.05},
-  {id:"RIVERA",     community:0, betweenness:0.0002, rawSize:11.46},
-  {id:"CHARLIE",    community:2, betweenness:0.0147, rawSize:18.05},
-  {id:"TOSCA",      community:2, betweenness:0.0143, rawSize:18.05},
-  {id:"DOC",        community:1, betweenness:0,      rawSize:10.73},
-  {id:"JONES",      community:3, betweenness:0,      rawSize:12.93},
-  {id:"TRUPO",      community:0, betweenness:0.0227, rawSize:16.59},
-  {id:"TANGO",      community:2, betweenness:0,      rawSize:14.39},
-  {id:"MRS. LUCAS", community:1, betweenness:0.0004, rawSize:12.20},
-  {id:"NATE",       community:1, betweenness:0.0005, rawSize:12.20},
-  {id:"SHEILA",     community:0, betweenness:0.0002, rawSize:11.46},
-  {id:"REPORTER ON TV", community:2, betweenness:0.0113, rawSize:18.05},
-  {id:"BANKER",     community:2, betweenness:0.0071, rawSize:17.32},
-  {id:"ABRUZZO",    community:3, betweenness:0,      rawSize:12.93},
-  {id:"BAILIFF",    community:0, betweenness:0.0002, rawSize:11.46},
-  {id:"JIMMY",      community:3, betweenness:0.0517, rawSize:18.05},
-  {id:"LAURIE",     community:0, betweenness:0,      rawSize:10.73},
-  {id:"TONY",       community:0, betweenness:0,      rawSize:11.46},
-  {id:"GENERAL",    community:1, betweenness:0,      rawSize:11.46},
-  {id:"SIBOTA",     community:2, betweenness:0,      rawSize:13.66},
-  {id:"DETECTIVE",  community:2, betweenness:0.0152, rawSize:16.59},
-  {id:"PROFESSOR",  community:2, betweenness:0,      rawSize:14.39},
-  {id:"KA 760 -",   community:3, betweenness:0,      rawSize:12.93},
-  {id:"CONTINUED:", community:1, betweenness:0.0054, rawSize:13.66},
-  {id:"MRS. TOSCA", community:1, betweenness:0,      rawSize:11.46},
-  {id:"ARMY CAPTAIN",community:0,betweenness:0,      rawSize:10},
-  {id:"COLONEL",    community:1, betweenness:0,      rawSize:11.46},
-  {id:"CLERK",      community:0, betweenness:0,      rawSize:10.73},
-  {id:"CHEMIST",    community:1, betweenness:0,      rawSize:10},
-  {id:"SINGER",     community:1, betweenness:0,      rawSize:10.73},
-  {id:"CAMPIZI",    community:0, betweenness:0,      rawSize:10},
-  {id:"CHARLENE",   community:1, betweenness:0,      rawSize:10},
-  {id:"BUMPY",      community:1, betweenness:0,      rawSize:10},
-  {id:"GANGSTA 2",  community:1, betweenness:0,      rawSize:11.46},
-  {id:"FBI AGENT",  community:0, betweenness:0,      rawSize:12.20},
-  {id:"MAN",        community:0, betweenness:0,      rawSize:12.20},
-  {id:"DISPATCHER", community:0, betweenness:0,      rawSize:10.73},
-  {id:"GANGSTA 1",  community:1, betweenness:0,      rawSize:11.46},
-  {id:"ROSSI",      community:1, betweenness:0,      rawSize:10},
-  {id:"REDTOP",     community:1, betweenness:0,      rawSize:10},
-  {id:"RED TOP",    community:1, betweenness:0,      rawSize:11.46},
-  {id:"JACKIE",     community:1, betweenness:0,      rawSize:10},
-  {id:"JOE LOUIS",  community:1, betweenness:0,      rawSize:11.46},
-  {id:"STEVIE",     community:2, betweenness:0,      rawSize:10.73},
-  {id:"THAI",       community:1, betweenness:0,      rawSize:10.73},
-  {id:"SERVICEMAN 1",community:1,betweenness:0,      rawSize:11.46},
-  {id:"SERVICEMAN 2",community:1,betweenness:0,      rawSize:11.46},
-  {id:"TURNER",     community:1, betweenness:0,      rawSize:10},
-  {id:"DARYLYNN",   community:3, betweenness:0,      rawSize:10},
-  {id:"MEDICAL EXAMINER",community:2,betweenness:0,  rawSize:12.20},
-  {id:"REPORTER",   community:2, betweenness:0,      rawSize:12.20},
-  {id:"JUDGE",      community:0, betweenness:0,      rawSize:10},
-  {id:"GUY WITH GUN",community:3,betweenness:0,      rawSize:10},
-  {id:"KA 760.",    community:2, betweenness:0,      rawSize:10},
-  {id:"PARAMEDIC",  community:0, betweenness:0,      rawSize:10},
-  {id:"MECHANIC",   community:0, betweenness:0,      rawSize:10},
-  {id:"SPEARMAN V/O PHONE",community:0,betweenness:0,rawSize:10.73},
-  {id:"SIU DET. 2", community:0, betweenness:0,      rawSize:12.93},
-  {id:"SIU DET. 1", community:0, betweenness:0,      rawSize:12.93},
-  {id:"SIU DET 1",  community:0, betweenness:0,      rawSize:12.93},
-  {id:"TAXI DRIVER",community:0, betweenness:0,      rawSize:10},
-  {id:"US ATTORNEY",community:0, betweenness:0,      rawSize:10.73},
-  {id:"VIDA",       community:0, betweenness:0,      rawSize:11.46}
-];
-
-const RAW_EDGES = [
-  {s:"RICHIE",t:"TOBACK",w:12},{s:"RICHIE",t:"SPEARMAN",w:7},{s:"RICHIE",t:"RIVERA",w:6},
-  {s:"RICHIE",t:"FRANK",w:5},{s:"RICHIE",t:"JONES",w:4},{s:"RICHIE",t:"TOSCA",w:3},
-  {s:"RICHIE",t:"SHEILA",w:3},{s:"RICHIE",t:"REPORTER ON TV",w:3},{s:"RICHIE",t:"BAILIFF",w:2},
-  {s:"RICHIE",t:"ABRUZZO",w:2},{s:"RICHIE",t:"JIMMY",w:2},{s:"RICHIE",t:"LAURIE",w:2},
-  {s:"RICHIE",t:"TRUPO",w:2},{s:"RICHIE",t:"TONY",w:2},{s:"RICHIE",t:"BANKER",w:1},
-  {s:"RICHIE",t:"ARMY CAPTAIN",w:1},{s:"RICHIE",t:"CONTINUED:",w:1},{s:"RICHIE",t:"CLERK",w:1},
-  {s:"RICHIE",t:"CHARLIE",w:1},{s:"RICHIE",t:"CAMPIZI",w:1},{s:"RICHIE",t:"FBI AGENT",w:1},
-  {s:"RICHIE",t:"GANGSTA 2",w:1},{s:"RICHIE",t:"GANGSTA 1",w:1},{s:"RICHIE",t:"DETECTIVE",w:1},
-  {s:"RICHIE",t:"DISPATCHER",w:1},{s:"RICHIE",t:"KA 760 -",w:1},{s:"RICHIE",t:"JUDGE",w:1},
-  {s:"RICHIE",t:"JOE LOUIS",w:1},{s:"RICHIE",t:"MEDICAL EXAMINER",w:1},{s:"RICHIE",t:"MAN",w:1},
-  {s:"RICHIE",t:"PROFESSOR",w:1},{s:"RICHIE",t:"PARAMEDIC",w:1},{s:"RICHIE",t:"REPORTER",w:1},
-  {s:"RICHIE",t:"MECHANIC",w:1},{s:"RICHIE",t:"SPEARMAN V/O PHONE",w:1},
-  {s:"RICHIE",t:"SIU DET. 2",w:1},{s:"RICHIE",t:"SIU DET. 1",w:1},{s:"RICHIE",t:"SIU DET 1",w:1},
-  {s:"RICHIE",t:"TANGO",w:1},{s:"RICHIE",t:"TAXI DRIVER",w:1},{s:"RICHIE",t:"US ATTORNEY",w:1},
-  {s:"RICHIE",t:"VIDA",w:1},
-  {s:"TOBACK",t:"CONTINUED:",w:1},{s:"TOBACK",t:"FRANK",w:1},{s:"TOBACK",t:"FBI AGENT",w:1},
-  {s:"TOBACK",t:"MRS. LUCAS",w:1},{s:"TOBACK",t:"REPORTER ON TV",w:1},{s:"TOBACK",t:"MAN",w:1},
-  {s:"TOBACK",t:"SIU DET 1",w:1},{s:"TOBACK",t:"SIU DET. 1",w:1},{s:"TOBACK",t:"SIU DET. 2",w:1},
-  {s:"TOBACK",t:"SPEARMAN",w:1},{s:"TOBACK",t:"TONY",w:1},{s:"TOBACK",t:"TRUPO",w:1},
-  {s:"TOBACK",t:"US ATTORNEY",w:1},{s:"TOBACK",t:"VIDA",w:1},
-  {s:"FRANK",t:"TEDDY",w:10},{s:"FRANK",t:"ANA",w:9},{s:"FRANK",t:"CHARLIE",w:5},
-  {s:"FRANK",t:"TOSCA",w:5},{s:"FRANK",t:"DOC",w:4},{s:"FRANK",t:"TRUPO",w:3},
-  {s:"FRANK",t:"TANGO",w:3},{s:"FRANK",t:"MRS. LUCAS",w:3},{s:"FRANK",t:"NATE",w:3},
-  {s:"FRANK",t:"BANKER",w:2},{s:"FRANK",t:"JIMMY",w:2},{s:"FRANK",t:"GENERAL",w:2},
-  {s:"FRANK",t:"CONTINUED:",w:1},{s:"FRANK",t:"COLONEL",w:1},{s:"FRANK",t:"CHEMIST",w:1},
-  {s:"FRANK",t:"CHARLENE",w:1},{s:"FRANK",t:"BUMPY",w:1},{s:"FRANK",t:"GANGSTA 2",w:1},
-  {s:"FRANK",t:"GANGSTA 1",w:1},{s:"FRANK",t:"DETECTIVE",w:1},{s:"FRANK",t:"ROSSI",w:1},
-  {s:"FRANK",t:"REPORTER ON TV",w:1},{s:"FRANK",t:"REDTOP",w:1},{s:"FRANK",t:"RED TOP",w:1},
-  {s:"FRANK",t:"MRS. TOSCA",w:1},{s:"FRANK",t:"PROFESSOR",w:1},{s:"FRANK",t:"JACKIE",w:1},
-  {s:"FRANK",t:"JOE LOUIS",w:1},{s:"FRANK",t:"SPEARMAN",w:1},{s:"FRANK",t:"STEVIE",w:1},
-  {s:"FRANK",t:"THAI",w:1},{s:"FRANK",t:"SINGER",w:1},{s:"FRANK",t:"SIBOTA",w:1},
-  {s:"FRANK",t:"SERVICEMAN 1",w:1},{s:"FRANK",t:"SERVICEMAN 2",w:1},{s:"FRANK",t:"TURNER",w:1},
-  {s:"TEDDY",t:"JIMMY",w:2},{s:"TEDDY",t:"BANKER",w:1},{s:"TEDDY",t:"ANA",w:1},
-  {s:"TEDDY",t:"CHARLIE",w:1},{s:"TEDDY",t:"DETECTIVE",w:1},{s:"TEDDY",t:"KA 760.",w:1},
-  {s:"TEDDY",t:"SIBOTA",w:1},{s:"TEDDY",t:"STEVIE",w:1},{s:"TEDDY",t:"TRUPO",w:1},
-  {s:"ANA",t:"MRS. LUCAS",w:1},{s:"ANA",t:"CONTINUED:",w:1},{s:"ANA",t:"TOSCA",w:1},
-  {s:"ANA",t:"MRS. TOSCA",w:1},{s:"ANA",t:"TRUPO",w:1},{s:"ANA",t:"DOC",w:1},
-  {s:"SPEARMAN",t:"ABRUZZO",w:2},{s:"SPEARMAN",t:"JONES",w:2},{s:"SPEARMAN",t:"FBI AGENT",w:1},
-  {s:"SPEARMAN",t:"KA 760 -",w:1},{s:"SPEARMAN",t:"JIMMY",w:1},{s:"SPEARMAN",t:"GUY WITH GUN",w:1},
-  {s:"SPEARMAN",t:"MAN",w:1},{s:"SPEARMAN",t:"TOSCA",w:1},{s:"SPEARMAN",t:"TRUPO",w:1},
-  {s:"RIVERA",t:"CLERK",w:1},{s:"RIVERA",t:"DISPATCHER",w:1},
-  {s:"CHARLIE",t:"BANKER",w:2},{s:"CHARLIE",t:"TOSCA",w:1},{s:"CHARLIE",t:"TANGO",w:1},
-  {s:"CHARLIE",t:"SINGER",w:1},{s:"CHARLIE",t:"SIBOTA",w:1},{s:"CHARLIE",t:"REPORTER ON TV",w:1},
-  {s:"CHARLIE",t:"PROFESSOR",w:1},{s:"CHARLIE",t:"JIMMY",w:1},{s:"CHARLIE",t:"DETECTIVE",w:1},
-  {s:"TOSCA",t:"BANKER",w:1},{s:"TOSCA",t:"JOE LOUIS",w:1},{s:"TOSCA",t:"MRS. TOSCA",w:1},
-  {s:"TOSCA",t:"PROFESSOR",w:1},{s:"TOSCA",t:"REPORTER ON TV",w:1},{s:"TOSCA",t:"TANGO",w:1},
-  {s:"TOSCA",t:"TRUPO",w:1},
-  {s:"JONES",t:"ABRUZZO",w:2},{s:"JONES",t:"JIMMY",w:1},{s:"JONES",t:"KA 760 -",w:1},
-  {s:"TRUPO",t:"SIU DET 1",w:1},{s:"TRUPO",t:"SIU DET. 1",w:1},{s:"TRUPO",t:"SIU DET. 2",w:1},
-  {s:"TANGO",t:"BANKER",w:1},{s:"TANGO",t:"PROFESSOR",w:1},{s:"TANGO",t:"REPORTER ON TV",w:1},
-  {s:"MRS. LUCAS",t:"CONTINUED:",w:1},
-  {s:"NATE",t:"COLONEL",w:1},{s:"NATE",t:"GENERAL",w:1},{s:"NATE",t:"THAI",w:1},
-  {s:"SHEILA",t:"BAILIFF",w:1},{s:"SHEILA",t:"SPEARMAN V/O PHONE",w:1},
-  {s:"REPORTER ON TV",t:"BANKER",w:1},{s:"REPORTER ON TV",t:"CONTINUED:",w:1},
-  {s:"REPORTER ON TV",t:"DETECTIVE",w:1},{s:"REPORTER ON TV",t:"PROFESSOR",w:1},
-  {s:"REPORTER ON TV",t:"REPORTER",w:1},{s:"REPORTER ON TV",t:"MEDICAL EXAMINER",w:1},
-  {s:"BANKER",t:"SIBOTA",w:1},{s:"BANKER",t:"DETECTIVE",w:1},{s:"BANKER",t:"JIMMY",w:1},
-  {s:"BANKER",t:"PROFESSOR",w:1},
-  {s:"ABRUZZO",t:"KA 760 -",w:1},{s:"ABRUZZO",t:"JIMMY",w:1},
-  {s:"BAILIFF",t:"LAURIE",w:1},
-  {s:"JIMMY",t:"KA 760 -",w:1},{s:"JIMMY",t:"DARYLYNN",w:1},{s:"JIMMY",t:"DETECTIVE",w:1},
-  {s:"JIMMY",t:"SIBOTA",w:1},
-  {s:"TONY",t:"VIDA",w:1},
-  {s:"GENERAL",t:"COLONEL",w:1},
-  {s:"SIBOTA",t:"DETECTIVE",w:1},
-  {s:"DETECTIVE",t:"MEDICAL EXAMINER",w:1},{s:"DETECTIVE",t:"REPORTER",w:1},
-  {s:"GANGSTA 2",t:"GANGSTA 1",w:1},
-  {s:"FBI AGENT",t:"MAN",w:1},
-  {s:"RED TOP",t:"SERVICEMAN 2",w:1},{s:"RED TOP",t:"SERVICEMAN 1",w:1},
-  {s:"SERVICEMAN 1",t:"SERVICEMAN 2",w:1},
-  {s:"MEDICAL EXAMINER",t:"REPORTER",w:1},
-  {s:"SIU DET. 2",t:"SIU DET 1",w:1},{s:"SIU DET. 2",t:"SIU DET. 1",w:1},
-  {s:"SIU DET. 1",t:"SIU DET 1",w:1}
-];
-
-/* =====================================================================
-   METRICS COMPUTATION
-   ===================================================================== */
-const COM_COLORS = {0:"#d64040", 1:"#d4af37", 2:"#4ba3b5", 3:"#af66cc"};
-const COM_NAMES  = {
-  0:"SIU / Otoczenie Richiego",
-  1:"Imperium Franka Lucasa",
-  2:"Neutralni / Media / Prawo",
-  3:"Prokuratura / Spearman"
-};
-
-// Build adjacency
-const nodeMap = {};
-RAW_NODES.forEach(n => { nodeMap[n.id] = {...n}; });
-
-const adj = {};    // id -> [{neighbor, weight}]
-const degW = {};   // weighted degree
-RAW_NODES.forEach(n => { adj[n.id] = []; degW[n.id] = 0; });
-
-RAW_EDGES.forEach(e => {
-  adj[e.s].push({neighbor:e.t, weight:e.w});
-  adj[e.t].push({neighbor:e.s, weight:e.w});
-  degW[e.s] += e.w;
-  degW[e.t] += e.w;
-});
-
-// Closeness (BFS on unweighted graph)
-function computeCloseness() {
-  const cl = {};
-  const ids = RAW_NODES.map(n => n.id);
-  ids.forEach(src => {
-    const dist = {[src]:0};
-    const q = [src];
-    let sumDist = 0, reachable = 0;
-    while (q.length) {
-      const cur = q.shift();
-      adj[cur].forEach(({neighbor}) => {
-        if (!(neighbor in dist)) {
-          dist[neighbor] = dist[cur] + 1;
-          sumDist += dist[neighbor];
-          reachable++;
-          q.push(neighbor);
+            if (currentSlide === 1) setTimeout(() => drawSpeakersChart(), 100);
+            if (currentSlide === 2) setTimeout(() => drawEmotionChart(), 100);
+            if (currentSlide === 3) setTimeout(() => drawEmotionsGenderChart(), 100);
+            if (currentSlide === 4) setTimeout(() => drawNetwork(), 100);
         }
-      });
-    }
-    cl[src] = reachable > 0 ? reachable / sumDist : 0;
-  });
-  return cl;
-}
 
-// PageRank
-function computePageRank(iter=60, d=0.85) {
-  const n = RAW_NODES.length;
-  const pr = {};
-  const out = {};
-  RAW_NODES.forEach(nd => { pr[nd.id] = 1/n; out[nd.id] = adj[nd.id].length || 1; });
-  for (let i=0; i<iter; i++) {
-    const np = {};
-    RAW_NODES.forEach(nd => {
-      let s = 0;
-      adj[nd.id].forEach(({neighbor}) => { s += pr[neighbor] / out[neighbor]; });
-      np[nd.id] = (1-d)/n + d*s;
-    });
-    Object.assign(pr, np);
-  }
-  return pr;
-}
+        document.getElementById('next-btn').addEventListener('click', () => {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlide();
+        });
 
-const closeness = computeCloseness();
-const pagerank  = computePageRank();
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlide();
+        });
 
-// Assign to nodes
-RAW_NODES.forEach(n => {
-  n.degree      = degW[n.id];
-  n.closeness   = closeness[n.id];
-  n.pagerank    = pagerank[n.id];
-});
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                updateSlide();
+            } else if (e.key === 'ArrowLeft') {
+                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                updateSlide();
+            }
+        });
 
-/* =====================================================================
-   D3 GRAPH
-   ===================================================================== */
-const container  = document.getElementById('graph-panel');
-const svgEl      = document.getElementById('graph-svg');
+        // ===== SLAJD 2: SPEAKERS CHART =====
+        function drawSpeakersChart() {
+            const container = document.getElementById('speakers-chart');
+            if (container.children.length > 0) return;
 
-function getSize() {
-  return {w: container.clientWidth, h: container.clientHeight};
-}
+            const data = bundleData.top_speakers.slice(0, 12);
+            const margin = { top: 20, right: 40, bottom: 20, left: 150 };
+            const width = container.parentElement.clientWidth - margin.left - margin.right;
+            const height = container.parentElement.clientHeight - margin.top - margin.bottom;
 
-// Funkcja wyliczająca docelowy punkt (ognisko grawitacji) dla danej społeczności
-function getFocalPoint(com, width, height) {
-  const r = Math.min(width, height) * 0.28; // Promień rozstawienia klastrów
-  const angles = [
-    -Math.PI / 4,       // Com 0: Prawy-Górny róg
-    Math.PI / 4,        // Com 1: Prawy-Dolny róg
-    Math.PI * 3 / 4,    // Com 2: Lewy-Dolny róg
-    -Math.PI * 3 / 4    // Com 3: Lewy-Górny róg
-  ];
-  const angle = angles[com % 4];
-  return {
-    x: width / 2 + r * Math.cos(angle),
-    y: height / 2 + r * Math.sin(angle)
-  };
-}
+            const svg = d3.select('#speakers-chart')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
 
-const svg = d3.select('#graph-svg');
-const g = svg.append('g');
+            const yScale = d3.scaleBand()
+                .domain(data.map(d => d.name))
+                .range([height, 0])
+                .padding(0.3);
 
-// ── Nodes and links data ──
-const nodes = RAW_NODES.map(n => ({...n}));
-const links = RAW_EDGES.map(e => ({source:e.s, target:e.t, weight:e.w}));
+            const xScale = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.word_count)])
+                .range([0, width]);
 
-// Weight extent for edge styling
-const wExtent = d3.extent(links, d => d.weight);
-const strokeW = d3.scaleLinear().domain(wExtent).range([1.5, 4]);
-const strokeO = d3.scaleLinear().domain(wExtent).range([0.3, 0.8]);
+            const colorScale = d3.scaleOrdinal()
+                .domain(['K', 'M', '?'])
+                .range(['var(--gender-K)', 'var(--gender-M)', 'var(--gender-unknown)']);
 
-// ── Active metric ──
-let activeMetric = 'degree';
-let selectedNode = null;
+            svg.selectAll('.bar')
+                .data(data)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar')
+                .attr('y', d => yScale(d.name))
+                .attr('height', yScale.bandwidth())
+                .attr('x', 0)
+                .attr('width', d => xScale(d.word_count))
+                .attr('fill', d => {
+                    const genderMap = { 'K': '#ff006e', 'M': '#5b21b6', '?': '#888888' };
+                    return genderMap[d.gender];
+                });
 
-function getMetricVal(n) {
-  if (activeMetric === 'degree')      return n.degree;
-  if (activeMetric === 'betweenness') return n.betweenness;
-  if (activeMetric === 'closeness')   return n.closeness;
-  if (activeMetric === 'pagerank')    return n.pagerank;
-}
+            svg.selectAll('.value-label')
+                .data(data)
+                .enter()
+                .append('text')
+                .attr('class', 'value-label')
+                .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2)
+                .attr('x', d => xScale(d.word_count) + 5)
+                .attr('dy', '0.35em')
+                .attr('fill', 'var(--light-text)')
+                .attr('font-size', '0.8rem')
+                .text(d => d.word_count);
 
-function getNodeRadius(n) {
-  const val = getMetricVal(n);
-  const allVals = nodes.map(getMetricVal);
-  const [mn, mx] = d3.extent(allVals);
-  const t = mx > mn ? (val - mn) / (mx - mn) : 0.5;
-  const boost = (n.id === 'RICHIE' || n.id === 'FRANK') ? 1.2 : 1;
-  return (6 + t * 24) * boost;
-}
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(xScale).ticks(5));
 
-function getFontSize(r) { return Math.max(8, Math.min(14, r * 0.9)); }
+            svg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(yScale));
 
-// ── Force simulation ──
-let {w, h} = getSize();
+            svg.selectAll('.axis text')
+                .attr('fill', 'var(--light-text)')
+                .attr('font-size', '0.9rem');
 
-const simulation = d3.forceSimulation(nodes)
-  .force('link', d3.forceLink(links).id(d => d.id)
-    .distance(d => 60 + 100 / (d.weight || 1)) // Zmniejszony dystans linków (wcześniej 80 + 150)
-    .strength(d => Math.min(1, d.weight / 15))
-  )
-  .force('charge', d3.forceManyBody().strength(-300).distanceMax(600)) // Słabsze odpychanie by zachować spójność (wcześniej -450)
-  .force('center', d3.forceCenter(w/2, h/2))
-  // MODYFIKACJA: Dodane siły X i Y grupujące społeczności
-  .force('x', d3.forceX(d => getFocalPoint(d.community, w, h).x).strength(0.12))
-  .force('y', d3.forceY(d => getFocalPoint(d.community, w, h).y).strength(0.12))
-  .force('collision', d3.forceCollide().radius(d => getNodeRadius(d) + 15)) // Mniejszy promień kolizji (wcześniej 20)
-  .alphaDecay(0.02)
-  .velocityDecay(0.4);
+            svg.selectAll('.axis line, .axis path')
+                .attr('stroke', 'var(--primary-purple)')
+                .attr('stroke-width', 1.5);
+        }
 
-// ── Draw links ──
-const linkSel = g.append('g').attr('class','links')
-  .selectAll('line')
-  .data(links)
-  .join('line')
-    .attr('class','link')
-    .attr('stroke', '#666')
-    .attr('stroke-width', d => strokeW(d.weight))
-    .attr('stroke-opacity', d => strokeO(d.weight));
+        // ===== SLAJD 3: EMOTION ARC =====
+        function drawEmotionChart() {
+            const container = document.getElementById('emotion-chart');
+            if (container.children.length > 0) return;
 
-// ── Draw nodes ──
-const nodeG = g.append('g').attr('class','nodes')
-  .selectAll('g')
-  .data(nodes)
-  .join('g')
-    .attr('class','node')
-    .call(d3.drag()
-      .on('start', dragStart)
-      .on('drag',  dragged)
-      .on('end',   dragEnd)
-    );
+            const data = bundleData.emotion_arc;
+            const margin = { top: 20, right: 40, bottom: 40, left: 60 };
+            const width = container.parentElement.clientWidth - margin.left - margin.right;
+            const height = container.parentElement.clientHeight - margin.top - margin.bottom;
 
-nodeG.append('circle')
-  .attr('r', d => getNodeRadius(d))
-  .attr('fill', d => COM_COLORS[d.community])
-  .attr('stroke', '#121212')
-  .attr('stroke-width', 2);
+            const svg = d3.select('#emotion-chart')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
 
-nodeG.append('text')
-  .attr('class','lbl')
-  .attr('dy', d => getNodeRadius(d) + getFontSize(getNodeRadius(d)) + 4)
-  .attr('text-anchor','middle')
-  .attr('font-size', d => getFontSize(getNodeRadius(d)))
-  .attr('fill', d => COM_COLORS[d.community])
-  .attr('stroke', '#000')
-  .attr('stroke-width', 4)
-  .text(d => d.id);
+            const xScale = d3.scaleLinear()
+                .domain([d3.min(data, d => d.scene), d3.max(data, d => d.scene)])
+                .range([0, width]);
 
-// ── Zoom ──
-const zoom = d3.zoom()
-  .scaleExtent([0.2, 3])
-  .on('zoom', e => g.attr('transform', e.transform));
+            const yScale = d3.scaleLinear()
+                .domain([-1, 1])
+                .range([height, 0]);
 
-svg.call(zoom);
+            const line = d3.line()
+                .x(d => xScale(d.scene))
+                .y(d => yScale(d.rolling_valence));
 
-// ── Tick ──
-simulation.on('tick', () => {
-  linkSel
-    .attr('x1', d => d.source.x)
-    .attr('y1', d => d.source.y)
-    .attr('x2', d => d.target.x)
-    .attr('y2', d => d.target.y);
+            const areaPositive = d3.area()
+                .x(d => xScale(d.scene))
+                .y0(d => yScale(0))
+                .y1(d => yScale(Math.max(0, d.rolling_valence)));
 
-  nodeG.attr('transform', d => `translate(${d.x},${d.y})`);
-});
+            const areaNegative = d3.area()
+                .x(d => xScale(d.scene))
+                .y0(d => yScale(0))
+                .y1(d => yScale(Math.min(0, d.rolling_valence)));
 
-// ── Drag ──
-function dragStart(event, d) {
-  if (!event.active) simulation.alphaTarget(0.3).restart();
-  d.fx = d.x; d.fy = d.y;
-}
-function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
-function dragEnd(event, d) {
-  if (!event.active) simulation.alphaTarget(0);
-  d.fx = null; d.fy = null;
-}
+            svg.append('path')
+                .attr('class', 'area-positive')
+                .attr('d', areaPositive(data));
 
-// ── Click highlight ──
-const neighborSet = {};
-nodes.forEach(n => { neighborSet[n.id] = new Set([n.id]); });
-links.forEach(l => {
-  const s = l.source.id || l.source;
-  const t = l.target.id || l.target;
-  neighborSet[s].add(t);
-  neighborSet[t].add(s);
-});
+            svg.append('path')
+                .attr('class', 'area-negative')
+                .attr('d', areaNegative(data));
 
-function highlightNode(d) {
-  selectedNode = d;
-  const nb = neighborSet[d.id];
+            svg.append('path')
+                .attr('class', 'emotion-line')
+                .attr('d', line(data));
 
-  nodeG.selectAll('circle')
-    .attr('opacity', nd => nb.has(nd.id) ? 1 : 0.15);
-  nodeG.selectAll('text')
-    .attr('opacity', nd => nb.has(nd.id) ? 1 : 0.1);
-  linkSel
-    .attr('stroke-opacity', l => {
-      const s = l.source.id || l.source;
-      const t = l.target.id || l.target;
-      return (s === d.id || t === d.id) ? Math.max(strokeO(l.weight), 0.8) : 0.05;
-    })
-    .attr('stroke', l => {
-      const s = l.source.id || l.source;
-      const t = l.target.id || l.target;
-      return (s === d.id || t === d.id) ? COM_COLORS[d.community] : '#666';
-    });
+            svg.append('line')
+                .attr('class', 'zero-line')
+                .attr('x1', 0)
+                .attr('x2', width)
+                .attr('y1', yScale(0))
+                .attr('y2', yScale(0));
 
-  // Highlight selected node border
-  nodeG.selectAll('circle')
-    .attr('stroke', nd => nd.id === d.id ? '#fff' : '#121212')
-    .attr('stroke-width', nd => nd.id === d.id ? 3 : 2);
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(xScale).ticks(8));
 
-  showCard(d);
-  updateRankSelected(d.id);
-}
+            svg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d.toFixed(1)));
 
-function resetHighlight() {
-  selectedNode = null;
-  nodeG.selectAll('circle')
-    .attr('opacity', 1)
-    .attr('stroke', '#121212')
-    .attr('stroke-width', 2);
-  nodeG.selectAll('text').attr('opacity', 1);
-  linkSel
-    .attr('stroke-opacity', d => strokeO(d.weight))
-    .attr('stroke', '#666');
-  hideCard();
-  updateRankSelected(null);
-}
+            svg.selectAll('.axis text')
+                .attr('fill', 'var(--light-text)')
+                .attr('font-size', '0.85rem');
 
-nodeG.on('click', (event, d) => {
-  event.stopPropagation();
-  if (selectedNode && selectedNode.id === d.id) resetHighlight();
-  else highlightNode(d);
-});
+            svg.selectAll('.axis line, .axis path')
+                .attr('stroke', 'var(--primary-purple)')
+                .attr('stroke-width', 1.5);
 
-svg.on('click', () => resetHighlight());
+            svg.selectAll('circle.dot')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('cx', d => xScale(d.scene))
+                .attr('cy', d => yScale(d.rolling_valence))
+                .attr('r', 2.5)
+                .attr('fill', 'var(--accent-cyan)')
+                .attr('opacity', 0.6);
+        }
 
-// ── Tooltip ──
-const tooltip = document.getElementById('tooltip');
-const ttName  = document.getElementById('tt-name');
-const ttRows  = document.getElementById('tt-rows');
+        // ===== SLAJD 4: EMOTIONS × GENDER =====
+        function drawEmotionsGenderChart() {
+            const container = document.getElementById('emotions-gender-chart');
+            if (container.children.length > 0) return;
 
-nodeG.on('mouseenter', (event, d) => {
-  ttName.textContent = d.id;
-  ttName.style.color = COM_COLORS[d.community];
-  const rows = [
-    ['Stopień', d.degree],
-    ['Pośrednictwo', d.betweenness.toFixed(4)],
-    ['Bliskość', d.closeness.toFixed(4)],
-    ['PageRank', d.pagerank.toFixed(4)]
-  ];
-  ttRows.innerHTML = rows.map(([l,v]) =>
-    `<div class="tt-row">${l}: <span class="tt-val">${v}</span></div>`
-  ).join('');
-  tooltip.style.display = 'block';
-});
+            const emotions = ['radość', 'smutek', 'złość', 'strach', 'zaskoczenie', 'neutralna'];
+            const data = [
+                {gender: 'K', values: [43.7, 17.65, 5.04, 14.29, 0.84, 18.49]},
+                {gender: 'M', values: [36.24, 16.11, 6.71, 7.05, 0.0, 33.89]}
+            ];
 
-nodeG.on('mousemove', event => {
-  let x = event.clientX + 16, y = event.clientY + 16;
-  if (x + 240 > window.innerWidth) x = event.clientX - 260;
-  tooltip.style.left = x + 'px';
-  tooltip.style.top  = y + 'px';
-});
+            const stackedData = emotions.map((emotion, i) => ({
+                emotion: emotion,
+                K: data[0].values[i],
+                M: data[1].values[i]
+            }));
 
-nodeG.on('mouseleave', () => { tooltip.style.display = 'none'; });
+            const margin = { top: 20, right: 40, bottom: 60, left: 60 };
+            const width = container.parentElement.clientWidth - margin.left - margin.right;
+            const height = container.parentElement.clientHeight - margin.top - margin.bottom;
 
-// ── Node Card ──
-function showCard(d) {
-  document.getElementById('card-empty').style.display = 'none';
-  document.getElementById('card-content').style.display = 'block';
-  document.getElementById('card-bar').style.background = COM_COLORS[d.community];
-  document.getElementById('card-name').textContent = d.id;
-  document.getElementById('card-name').style.color = COM_COLORS[d.community];
+            const svg = d3.select('#emotions-gender-chart')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
 
-  const metrics = [
-    {label:'Stopień',      val: d.degree},
-    {label:'Pośrednictwo', val: d.betweenness.toFixed(4)},
-    {label:'Bliskość',     val: d.closeness.toFixed(4)},
-    {label:'PageRank',     val: d.pagerank.toFixed(4)},
-    {label:'Społeczność',  val: COM_NAMES[d.community].split('/')[0].trim()}
-  ];
-  document.getElementById('card-metrics').innerHTML = metrics.map(m =>
-    `<div class="metric-box">
-      <div class="metric-box-label">${m.label}</div>
-      <div class="metric-box-val">${m.val}</div>
-    </div>`
-  ).join('');
+            const xScale = d3.scaleBand()
+                .domain(emotions)
+                .range([0, width])
+                .padding(0.3);
 
-  const nb = adj[d.id]
-    .sort((a,b) => b.weight - a.weight)
-    .slice(0,5)
-    .map(x => `<span>${x.neighbor}</span> (${x.weight})`);
-  document.getElementById('card-neighbors').innerHTML =
-    `<span style="color:var(--text-dim);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase">Powiązania: </span>` + nb.join(' · ');
-}
+            const yScale = d3.scaleLinear()
+                .domain([0, 100])
+                .range([height, 0]);
 
-function hideCard() {
-  document.getElementById('card-empty').style.display = 'flex';
-  document.getElementById('card-content').style.display = 'none';
-}
+            const xSubScale = d3.scaleBand()
+                .domain(['K', 'M'])
+                .range([0, xScale.bandwidth()])
+                .padding(0.05);
 
-// ── Legend ──
-const legendEl = document.getElementById('legend-items');
-const comCounts = {};
-RAW_NODES.forEach(n => { comCounts[n.community] = (comCounts[n.community]||0)+1; });
+            emotions.forEach(emotion => {
+                const emotionData = stackedData.find(d => d.emotion === emotion);
+                svg.selectAll(`rect.${emotion}`)
+                    .data([
+                        {emotion: emotion, gender: 'K', value: emotionData.K},
+                        {emotion: emotion, gender: 'M', value: emotionData.M}
+                    ])
+                    .enter()
+                    .append('rect')
+                    .attr('x', d => xScale(emotion) + xSubScale(d.gender))
+                    .attr('y', d => yScale(d.value))
+                    .attr('width', xSubScale.bandwidth())
+                    .attr('height', d => height - yScale(d.value))
+                    .attr('fill', d => {
+                        return d.gender === 'K' ? '#ff006e' : '#5b21b6';
+                    })
+                    .attr('class', 'bar');
 
-Object.entries(COM_NAMES).forEach(([com, name]) => {
-  const d = document.createElement('div');
-  d.className = 'legend-item';
-  d.innerHTML = `<div class="leg-dot" style="background:${COM_COLORS[com]}"></div>
-    <span class="leg-name">${name}</span>
-    <span class="leg-cnt">${comCounts[com]} postaci</span>`;
-  legendEl.appendChild(d);
-});
+                svg.selectAll(`text.${emotion}`)
+                    .data([
+                        {emotion: emotion, gender: 'K', value: emotionData.K},
+                        {emotion: emotion, gender: 'M', value: emotionData.M}
+                    ])
+                    .enter()
+                    .append('text')
+                    .attr('x', d => xScale(emotion) + xSubScale(d.gender) + xSubScale.bandwidth() / 2)
+                    .attr('y', d => yScale(d.value) - 5)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', 'var(--light-text)')
+                    .attr('font-size', '0.75rem')
+                    .text(d => d.value.toFixed(1) + '%');
+            });
 
-// ── Ranking Panel ──
-let activeTab = 'degree';
+            svg.append('g')
+                .attr('class', 'axis')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(xScale));
 
-function renderRanking() {
-  const list = document.getElementById('rank-list');
-  const metric = activeTab;
-  const sorted = [...nodes].sort((a,b) => {
-    if (metric === 'degree')      return b.degree      - a.degree;
-    if (metric === 'betweenness') return b.betweenness - a.betweenness;
-    if (metric === 'closeness')   return b.closeness   - a.closeness;
-    if (metric === 'pagerank')    return b.pagerank     - a.pagerank;
-  });
-  const maxVal = metric === 'degree'      ? sorted[0].degree
-               : metric === 'betweenness' ? sorted[0].betweenness
-               : metric === 'closeness'   ? sorted[0].closeness
-               :                            sorted[0].pagerank;
+            svg.append('g')
+                .attr('class', 'axis')
+                .call(d3.axisLeft(yScale).ticks(5));
 
-  list.innerHTML = sorted.map((n, i) => {
-    const val = metric === 'degree'      ? n.degree
-              : metric === 'betweenness' ? n.betweenness
-              : metric === 'closeness'   ? n.closeness
-              :                            n.pagerank;
-    const pct = maxVal > 0 ? (val / maxVal * 100) : 0;
-    const sel = selectedNode && selectedNode.id === n.id ? 'selected' : '';
-    const display = metric === 'degree' ? val : val.toFixed(3);
-    return `<div class="rank-item ${sel}" data-id="${n.id}">
-      <span class="ri-num">${i+1}</span>
-      <span class="ri-dot" style="background:${COM_COLORS[n.community]}"></span>
-      <span class="ri-name">${n.id}</span>
-      <div class="ri-bar-wrap"><div class="ri-bar" style="width:${pct}%;background:${COM_COLORS[n.community]}"></div></div>
-      <span class="ri-val">${display}</span>
-    </div>`;
-  }).join('');
+            svg.selectAll('.axis text')
+                .attr('fill', 'var(--light-text)')
+                .attr('font-size', '0.85rem');
 
-  list.querySelectorAll('.rank-item').forEach(el => {
-    el.addEventListener('click', () => {
-      const nd = nodes.find(n => n.id === el.dataset.id);
-      if (nd) {
-        if (selectedNode && selectedNode.id === nd.id) resetHighlight();
-        else highlightNode(nd);
-      }
-    });
-  });
-}
+            svg.selectAll('.axis line, .axis path')
+                .attr('stroke', 'var(--primary-purple)')
+                .attr('stroke-width', 1.5);
 
-function updateRankSelected(id) {
-  document.querySelectorAll('.rank-item').forEach(el => {
-    el.classList.toggle('selected', el.dataset.id === id);
-  });
-}
+            svg.append('text')
+                .attr('y', -10)
+                .attr('x', width / 2)
+                .attr('text-anchor', 'middle')
+                .attr('fill', 'var(--light-text)')
+                .attr('font-size', '0.85rem')
+                .text('Procent emocji w mowie (%)');
+        }
 
-// Tab buttons
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeTab = btn.dataset.tab;
-    renderRanking();
-  });
-});
+        // ===== SLAJD 5: NETWORK =====
+        function drawNetwork() {
+            const container = document.getElementById('network-svg');
+            if (container.children.length > 0) return;
 
-// Ctrl buttons
-document.querySelectorAll('.ctrl-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeMetric = btn.dataset.metric;
-    updateNodeSizes();
-  });
-});
+            const nodes = bundleData.network.nodes;
+            const edges = bundleData.network.edges;
 
-function updateNodeSizes() {
-  nodeG.selectAll('circle')
-    .transition().duration(500)
-    .attr('r', d => getNodeRadius(d));
-  nodeG.selectAll('text')
-    .transition().duration(500)
-    .attr('dy', d => getNodeRadius(d) + getFontSize(getNodeRadius(d)) + 4)
-    .attr('font-size', d => getFontSize(getNodeRadius(d)));
-  simulation.force('collision').radius(d => getNodeRadius(d) + 15);
-  simulation.alpha(0.2).restart();
-}
+            const nodesByName = new Map(nodes.map(n => [n.id, n]));
 
-// Resize
-window.addEventListener('resize', () => {
-  const s = getSize();
-  w = s.w; h = s.h;
-  simulation.force('center', d3.forceCenter(w/2, h/2));
-  // Modyfikacja przy resize okna - upewniamy się, że siły grawitacyjne dostosują się do nowych wymiarów
-  simulation.force('x', d3.forceX(d => getFocalPoint(d.community, w, h).x).strength(0.12));
-  simulation.force('y', d3.forceY(d => getFocalPoint(d.community, w, h).y).strength(0.12));
-  simulation.alpha(0.1).restart();
-});
+            const width = container.clientWidth;
+            const height = container.clientHeight;
 
-// Initial render
-renderRanking();
+            const svg = d3.select('#network-svg')
+                .attr('viewBox', [0, 0, width, height])
+                .attr('width', width)
+                .attr('height', height);
 
-// Fit graph after sim settles
-simulation.on('end', () => {
-  const xs = nodes.map(n => n.x), ys = nodes.map(n => n.y);
-  const x0 = Math.min(...xs)-40, y0 = Math.min(...ys)-40;
-  const x1 = Math.max(...xs)+40, y1 = Math.max(...ys)+40;
-  const gw = x1-x0, gh = y1-y0;
-  const {w:sw, h:sh} = getSize();
-  const scale = Math.min(sw/gw, sh/gh, 1) * 0.85;
-  const tx = sw/2 - (x0+gw/2)*scale;
-  const ty = sh/2 - (y0+gh/2)*scale;
-  svg.transition().duration(1000)
-    .call(zoom.transform, d3.zoomIdentity.translate(tx,ty).scale(scale));
-});
-</script>
+            const simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(edges)
+                    .id(d => d.id)
+                    .distance(d => 100 + (1 / (d.weight || 1)) * 50))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => {
+                    const scale = d.word_count / 100 + 15;
+                    return Math.min(scale, 40);
+                }));
+
+            const link = svg.selectAll('line')
+                .data(edges)
+                .enter()
+                .append('line')
+                .attr('class', 'link')
+                .attr('stroke-width', d => Math.sqrt(d.weight) * 1.2);
+
+            const nodeGroup = svg.selectAll('g.node-group')
+                .data(nodes)
+                .enter()
+                .append('g')
+                .attr('class', 'node-group')
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+
+            const nodeCircle = nodeGroup.append('circle')
+                .attr('class', 'node')
+                .attr('r', d => {
+                    const scale = d.word_count / 100 + 15;
+                    return Math.min(scale, 40);
+                })
+                .attr('fill', d => {
+                    const genderMap = { 'K': '#ff006e', 'M': '#5b21b6', '?': '#888888' };
+                    return genderMap[d.gender];
+                });
+
+            const labels = nodeGroup.append('text')
+                .attr('class', 'node-label')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '0.3em')
+                .text(d => d.id)
+                .attr('font-size', d => {
+                    const top10 = nodes.sort((a, b) => b.word_count - a.word_count).slice(0, 10).map(n => n.id);
+                    return top10.includes(d.id) ? '0.85rem' : '0rem';
+                })
+                .attr('opacity', d => {
+                    const top10 = nodes.sort((a, b) => b.word_count - a.word_count).slice(0, 10).map(n => n.id);
+                    return top10.includes(d.id) ? 1 : 0;
+                });
+
+            nodeCircle.on('click', function(event, d) {
+                const card = document.getElementById('node-card');
+                const neighbors = edges.filter(e => e.source.id === d.id || e.target.id === d.id)
+                    .map(e => e.source.id === d.id ? e.target.id : e.source.id)
+                    .slice(0, 3);
+
+                card.innerHTML = `
+                    <h4>${d.id}</h4>
+                    <p><strong>Płeć:</strong> ${d.gender === 'K' ? 'Kobieta' : d.gender === 'M' ? 'Mężczyzna' : 'Zbiorowa'}</p>
+                    <p><strong>Słowa:</strong> ${d.word_count}</p>
+                    <p><strong>Dominująca emocja:</strong> ${d.dominant_emotion}</p>
+                    <p><strong>Średnia walencja:</strong> ${d.avg_valence.toFixed(3)}</p>
+                    <p><strong>Główni kontrahenci:</strong> ${neighbors.join(', ') || 'brak'}</p>
+                `;
+                card.classList.add('show');
+
+                const rect = event.target.getBoundingClientRect();
+                card.style.left = (rect.right + 10) + 'px';
+                card.style.top = rect.top + 'px';
+            });
+
+            svg.on('click', function() {
+                document.getElementById('node-card').classList.remove('show');
+            });
+
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+
+                nodeGroup
+                    .attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+
+        updateSlide();
+    </script>
 </body>
 </html>
